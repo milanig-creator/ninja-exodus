@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+
+/* Full-screen background for login and register pages */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background: url("/game/assets/background.jpg") no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Roboto Mono', monospace;
+  color: #e0e0e0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.login-container {
+  width: 100%;
+  max-width: 800px;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.login-box {
+  background-color: #121212;
+  border: 1px solid #2a2a2a;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.4),
+    0 0 15px rgba(255, 0, 0, 0.3);
+  text-align: center;
+}
+
+.login-title {
+  font-size: 32px;
+  color: #f36;
+  margin-bottom: 10px;
+}
+
+.login-subtext {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background: #fff;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+button[type="submit"] {
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background: #333;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transition: background 0.2s ease;
+}
+
+button[type="submit"]:hover {
+  background: #444;
+}
+
+.login-footer {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.login-footer a {
+  color: #f36;
+  text-decoration: none;
+}
+
+.error {
+  color: #f66;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+footer.copyright {
+  margin-top: 20px;
+  text-align: center;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.login-container {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url("/game/assets/background.jpg") no-repeat center center fixed;
+  background-size: cover;
+  margin: 0;
+  padding: 0;
+}
+
+.login-box {
+  background-color: rgba(0, 0, 0, 0.75);
+  padding: 40px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.login-image {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+.login-box h1 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.login-box p {
+  font-size: 14px;
+  margin-bottom: 20px;
+  color: #ddd;
+}
+
+.login-box input {
+  padding: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  border-radius: 5px;
+  border: none;
+  font-size: 16px;
+}
+
+.login-box button {
+  padding: 10px;
+  width: 100%;
+  border-radius: 5px;
+  border: none;
+  font-size: 16px;
+  background-color: #333;
+  color: #fff;
+  cursor: pointer;
+}
+
+.footer-copy {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #888;
+}
+
+
+
+
+
+
+
+
+

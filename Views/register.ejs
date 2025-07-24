@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | The Ninja Exodus</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <img src="/game/assets/logo.png" alt="Ninja Register Art" class="login-image" />
+      <h1>The Ninja Exodus</h1>
+
+      <% if (error) { %>
+        <div class="error-banner"><%= error %></div>
+      <% } %>
+      <% if (success) { %>
+        <div class="success-banner"><%= success %></div>
+      <% } %>
+
+      <form action="/register" method="POST">
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          required
+          value="<%= username %>"
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email Address"
+          required
+          value="<%= email %>"
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          required
+        />
+        <input
+          type="password"
+          name="confirmPassword"
+          placeholder="Confirm Password"
+          required
+        />
+        <button type="submit">Sign Up</button>
+      </form>
+
+      <div class="login-footer">
+        Already have an account? <a href="/login">Log in here</a>
+      </div>
+      <footer class="copyright">© 2025 The Ninja Exodus v1.0.0</footer>
+    </div>
+  </div>
+</body>
+</html>
+
+
+
+
+
+

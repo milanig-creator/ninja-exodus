@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Confirmed | Ninja Exodus</title>
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    body {
+      background: #111;
+      color: #e0e0e0;
+      font-family: 'Roboto Mono', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    .message-box {
+      background: #1c1c1c;
+      padding: 2rem 3rem;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,255,150,0.3);
+      text-align: center;
+    }
+    .message-box h1 {
+      margin-bottom: 1rem;
+    }
+    .message-box p {
+      font-size: 1.1rem;
+    }
+  </style>
+  <script>
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 5000); // 5-second delay
+  </script>
+</head>
+<body>
+  <div class="message-box">
+    <h1>✅ Welcome to the Ninja Exodus</h1>
+    <p>Your email has been confirmed.</p>
+    <p>Redirecting to login...</p>
+  </div>
+</body>
+</html>

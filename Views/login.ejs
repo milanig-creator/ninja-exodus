@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | The Ninja Exodus</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <img src="/game/assets/logo.png" alt="Ninja Logo" class="login-image" />
+      <h1 class="login-title">The Ninja Exodus</h1>
+      <p class="login-subtext">
+        Inspired by old-school browser RPGs like The Ninja-RPG,<br />
+        Shinkaidō is a rebirth of the ninja world in a brand new land<br />
+        across distant seas. Build your legacy in Shinkaidō. A<br />
+        forgotten land filled with ancient power as old as time it-<br />
+        self. And now the lost continent calls to you...
+      </p>
+
+      <% if (error) { %>
+        <p class="error"><%= error %></p>
+      <% } %>
+
+      <form action="/login" method="POST">
+        <input type="email" name="email" placeholder="Email Address" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit">Log In</button>
+      </form>
+
+      <div class="login-footer">
+        Don’t have an account? <a href="/register">Register here</a>
+      </div>
+
+      <footer class="copyright">
+        © 2025 The Ninja Exodus v1.0.0
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
+
+
+

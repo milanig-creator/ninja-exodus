@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Ninja Exodus</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game">
+    <h1>The Ninja Exodus</h1>
+    <div id="output">
+      You awaken in an ancient forest and hear a strange humming in the distance...
+    </div>
+
+    <div id="controls">
+      <select id="command-select">
+        <option value="" disabled selected>Choose an action</option>
+        <option value="observe"    data-url="observe.html">
+          Observe and gather information
+        </option>
+        <option value="investigate" data-url="investigate.html">
+          Investigate the sound
+        </option>
+        <option value="hide"       data-url="hide.html">
+          Hide
+        </option>
+        <option value="shout"      data-url="shout.html">
+          Shout
+        </option>
+      </select>
+      <!-- start disabled and empty -->
+      <button id="go-btn" disabled></button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+

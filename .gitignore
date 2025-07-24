@@ -1,0 +1,34 @@
+# 💼 Environment variables
+.env
+
+# 📦 Node dependencies
+node_modules/
+
+# 🧾 Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ⚙️ OS/system junk
+.DS_Store
+Thumbs.db
+
+# 🚀 Local environment tools
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 🧪 Test output
+coverage/
+
+# 💣 Build output (if you later use TypeScript or bundlers)
+dist/
+build/
+
+# 🔄 Mac/Windows swap/backup files
+*.swp
+*.swo
+*.bak
