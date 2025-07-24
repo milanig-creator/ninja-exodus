@@ -23,6 +23,8 @@ const userSchema = new mongoose.Schema({
   isConfirmed: { type: Boolean, default: false },
   confirmationToken: String,
   confirmationExpires: Date,
+  resetToken: String,
+  resetTokenExpires: Date
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
@@ -59,6 +61,16 @@ app.get('/register', (req, res) => {
 // ----- POST Register Handler -----
 app.post('/register', async (req, res) => {
   const { username, email, password, confirmPassword } = req.body;
+
+  if (!username || !email || !password || !confirmPassword) {
+    return res.render('register', {
+      title: 'Register',
+      error: 'All fields are required.',
+      success: null,
+      username,
+      email
+    });
+  }
 
   if (password !== confirmPassword) {
     return res.render('register', {
@@ -184,6 +196,69 @@ app.post('/login', async (req, res) => {
     console.error(err);
     return res.render('login', { title: 'Login', error: 'Something went wrong.' });
   }
+});
+
+// ----- GET Forgot Password Page -----
+app.get('/forgot-password', (req, res) => {
+  res.render('forgotPassword', { title: 'Forgot Password', error: null, success: null });
+});
+
+// ----- POST Forgot Password Handler -----
+app.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.render('forgotPassword', { title: 'Forgot Password', error: 'Email not found.', success: null });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const hashed = crypto.createHash('sha256').update(token).digest('hex');
+    user.resetToken = hashed;
+    user.resetTokenExpires = Date.now() + 3600000;
+    await user.save();
+
+    await transporter.sendMail({
+      from: `"Ninja Exodus" <${process.env.SMTP_USER}>`,
+      to: user.email,
+      subject: "Reset your password",
+      text: `Reset your password by visiting this link: http://localhost:3000/reset-password/${token}`
+    });
+
+    res.render('forgotPassword', { title: 'Forgot Password', error: null, success: 'Reset link sent to your email.' });
+  } catch (err) {
+    console.error(err);
+    res.render('forgotPassword', { title: 'Forgot Password', error: 'Server error.', success: null });
+  }
+});
+
+// ----- GET Reset Password Form -----
+app.get('/reset-password/:token', async (req, res) => {
+  const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+  const user = await User.findOne({ resetToken: hashedToken, resetTokenExpires: { $gt: Date.now() } });
+
+  if (!user) return res.send('⚠️ Reset link is invalid or has expired.');
+
+  res.render('resetPassword', { title: 'Reset Password', token: req.params.token, error: null });
+});
+
+// ----- POST Reset Password Handler -----
+app.post('/reset-password/:token', async (req, res) => {
+  const { newPassword, confirmPassword } = req.body;
+  if (newPassword !== confirmPassword) return res.send('❌ Passwords do not match.');
+
+  const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+  const user = await User.findOne({ resetToken: hashedToken, resetTokenExpires: { $gt: Date.now() } });
+
+  if (!user) return res.send('⚠️ Reset link is invalid or expired.');
+
+  user.passwordHash = await bcrypt.hash(newPassword, 12);
+  user.resetToken = undefined;
+  user.resetTokenExpires = undefined;
+  await user.save();
+
+  res.render('passwordResetSuccess');
 });
 
 // ----- Start Server -----

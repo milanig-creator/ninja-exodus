@@ -175,6 +175,20 @@ footer.copyright {
   color: #888;
 }
 
+.forgot-password {
+  text-align: right;
+  margin: 8px 0;
+}
+
+.forgot-password a {
+  color: red;
+  font-size: 0.9em;
+  text-decoration: none;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
 
 
 
