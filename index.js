@@ -200,7 +200,7 @@ app.post('/login', async (req, res) => {
 
 // ----- GET Forgot Password Page -----
 app.get('/forgot-password', (req, res) => {
-  res.render('forgotPassword', { title: 'Forgot Password', error: null, success: null });
+  res.render('forgotpassword', { title: 'Forgot Password', error: null, success: null });
 });
 
 // ----- POST Forgot Password Handler -----
@@ -210,7 +210,7 @@ app.post('/forgot-password', async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.render('forgotPassword', { title: 'Forgot Password', error: 'Email not found.', success: null });
+      return res.render('forgotpassword', { title: 'Forgot Password', error: 'Email not found.', success: null });
     }
 
     const token = crypto.randomBytes(32).toString('hex');
@@ -226,10 +226,10 @@ app.post('/forgot-password', async (req, res) => {
       text: `Reset your password by visiting this link: http://localhost:3000/reset-password/${token}`
     });
 
-    res.render('forgotPassword', { title: 'Forgot Password', error: null, success: 'Reset link sent to your email.' });
+    res.render('forgotpassword', { title: 'Forgot Password', error: null, success: 'Reset link sent to your email.' });
   } catch (err) {
     console.error(err);
-    res.render('forgotPassword', { title: 'Forgot Password', error: 'Server error.', success: null });
+    res.render('forgotpassword', { title: 'Forgot Password', error: 'Server error.', success: null });
   }
 });
 
