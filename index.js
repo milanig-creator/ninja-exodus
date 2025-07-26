@@ -113,11 +113,26 @@ app.post('/register', async (req, res) => {
     const confirmURL = `${process.env.BASE_URL}/confirm/${confirmationToken}`;
 
     await transporter.sendMail({
-      from: `"Ninja Exodus" <${process.env.SMTP_USER}>`,
-      to: newUser.email,
-      subject: "Confirm your Ninja Exodus account ✔",
-      text: `Click this link to confirm your account:\n\n${confirmURL}`
-    });
+  from: `"Ninja Exodus" <${process.env.SMTP_USER}>`,
+  to: user.email,
+  subject: "Reset your password",
+  text: `Reset your password by visiting this link:\n\n${resetURL}`,
+  html: `
+    <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color: #B22222; text-align: center;">Ninja Exodus</h2>
+      <p>Hi there,</p>
+      <p>You recently requested to reset your password. Click the button below to proceed:</p>
+      <p style="text-align: center;">
+        <a href="${resetURL}" style="display: inline-block; background-color: #B22222; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+          Reset Your Password
+        </a>
+      </p>
+      <p>If you didn't request this, no action is needed. Your account is safe.</p>
+      <p style="margin-top: 40px;">— The Ninja Exodus Team</p>
+    </div>
+  `
+});
+
 
     return res.render('register', {
       title: 'Register',
