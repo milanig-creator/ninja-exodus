@@ -7,6 +7,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const path = require('path');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 
 const app = express();
 
@@ -45,17 +46,29 @@ const transporter = nodemailer.createTransport({
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'keyboard cat',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions'
+  })
 }));
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // ----- GET Register Page -----
 app.get('/register', (req, res) => {
-  res.render('register', { title: 'Register', error: null, success: null, username: '', email: '' });
+  res.render('register', {
+    title: 'Register',
+    error: null,
+    success: null,
+    username: '',
+    email: ''
+  });
 });
 
 // ----- POST Register Handler -----
@@ -63,24 +76,51 @@ app.post('/register', async (req, res) => {
   const { username, email, password, confirmPassword } = req.body;
 
   if (!username || !email || !password || !confirmPassword) {
-    return res.render('register', { title: 'Register', error: 'All fields are required.', success: null, username, email });
+    return res.render('register', {
+      title: 'Register',
+      error: 'All fields are required.',
+      success: null,
+      username,
+      email
+    });
   }
 
   if (password !== confirmPassword) {
-    return res.render('register', { title: 'Register', error: 'Passwords do not match!', success: null, username, email });
+    return res.render('register', {
+      title: 'Register',
+      error: 'Passwords do not match!',
+      success: null,
+      username,
+      email
+    });
   }
 
   try {
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+
     if (existingUser) {
-      return res.render('register', { title: 'Register', error: 'Username or email already taken.', success: null, username, email });
+      return res.render('register', {
+        title: 'Register',
+        error: 'Username or email already taken.',
+        success: null,
+        username,
+        email
+      });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
     const confirmationToken = crypto.randomBytes(32).toString('hex');
     const confirmationExpires = Date.now() + 24 * 60 * 60 * 1000;
 
-    const newUser = new User({ username, email, passwordHash, confirmationToken, confirmationExpires, isConfirmed: false });
+    const newUser = new User({
+      username,
+      email,
+      passwordHash,
+      confirmationToken,
+      confirmationExpires,
+      isConfirmed: false,
+    });
+
     await newUser.save();
 
     const confirmURL = `${process.env.BASE_URL}/confirm/${confirmationToken}`;
@@ -92,51 +132,95 @@ app.post('/register', async (req, res) => {
       html: `
         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
           <h2 style="color: #B22222; text-align: center;">Ninja Exodus</h2>
-          <p>Hi ${username},</p>
-          <p>Thanks for registering. Click the button below to confirm your email:</p>
+          <p>Thanks for registering! Click below to confirm your email:</p>
           <p style="text-align: center;">
             <a href="${confirmURL}" style="display: inline-block; background-color: #B22222; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
               Confirm Email
             </a>
           </p>
-          <p>If you didn't register, you can ignore this email.</p>
-          <p style="margin-top: 40px;">— The Ninja Exodus Team</p>
-        </div>`
+          <p>If you didn’t sign up, ignore this email.</p>
+        </div>
+      `
     });
 
-    res.render('register', { title: 'Register', error: null, success: 'Registration successful! Check your email to confirm your account.', username: '', email: '' });
+    return res.render('register', {
+      title: 'Register',
+      error: null,
+      success: 'Check your email to confirm your account.',
+      username: '',
+      email: ''
+    });
+
   } catch (err) {
     console.error(err);
-    res.render('register', { title: 'Register', error: 'Server error. Please try again later.', success: null, username, email });
+    return res.render('register', {
+      title: 'Register',
+      error: 'Server error. Please try again later.',
+      success: null,
+      username,
+      email
+    });
   }
 });
 
-// ----- GET Confirm Email -----
+// ----- Confirm Email -----
 app.get('/confirm/:token', async (req, res) => {
+  const token = req.params.token;
+
   try {
-    const user = await User.findOne({ confirmationToken: req.params.token, confirmationExpires: { $gt: Date.now() } });
-    if (!user) return res.send('⚠️ Confirmation link is invalid or expired.');
+    const user = await User.findOne({
+      confirmationToken: token,
+      confirmationExpires: { $gt: Date.now() },
+    });
+
+    if (!user) return res.send('⚠️ Confirmation link invalid or expired.');
 
     user.isConfirmed = true;
     user.confirmationToken = undefined;
     user.confirmationExpires = undefined;
     await user.save();
 
-    res.render('confirmationSuccess');
+    return res.render('confirmationSuccess');
   } catch (err) {
     console.error(err);
-    res.status(500).send('❌ Server error during confirmation.');
+    return res.status(500).send('❌ Server error during confirmation.');
   }
 });
 
-// ----- GET Forgot Password Page -----
+// ----- GET Login Page -----
+app.get('/login', (req, res) => {
+  res.render('login', { title: 'Login', error: null });
+});
+
+// ----- POST Login Handler -----
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.render('login', { title: 'Login', error: 'Email not found.' });
+    if (!user.isConfirmed) return res.render('login', { title: 'Login', error: 'Please confirm your email first.' });
+
+    const match = await bcrypt.compare(password, user.passwordHash);
+    if (!match) return res.render('login', { title: 'Login', error: 'Invalid password.' });
+
+    req.session.userId = user._id;
+    return res.send(`✅ Welcome, ${user.username}!`);
+  } catch (err) {
+    console.error(err);
+    return res.render('login', { title: 'Login', error: 'Something went wrong.' });
+  }
+});
+
+// ----- Forgot Password Page -----
 app.get('/forgot-password', (req, res) => {
   res.render('forgotpassword', { title: 'Forgot Password', error: null, success: null });
 });
 
-// ----- POST Forgot Password Handler -----
+// ----- Forgot Password Handler -----
 app.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
+
   try {
     const user = await User.findOne({ email });
     if (!user) return res.render('forgotpassword', { title: 'Forgot Password', error: 'Email not found.', success: null });
@@ -155,17 +239,15 @@ app.post('/forgot-password', async (req, res) => {
       subject: "Reset your password",
       html: `
         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h2 style="color: #B22222; text-align: center;">Ninja Exodus</h2>
-          <p>Hi there,</p>
-          <p>You requested a password reset. Click the button below to reset it:</p>
+          <h2 style="color: #B22222; text-align: center;">Reset Password</h2>
+          <p>Click below to reset your password:</p>
           <p style="text-align: center;">
             <a href="${resetURL}" style="display: inline-block; background-color: #B22222; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
               Reset Password
             </a>
           </p>
-          <p>If you didn't request this, no action is needed.</p>
-          <p style="margin-top: 40px;">— The Ninja Exodus Team</p>
-        </div>`
+        </div>
+      `
     });
 
     res.render('forgotpassword', { title: 'Forgot Password', error: null, success: 'Reset link sent to your email.' });
@@ -175,22 +257,25 @@ app.post('/forgot-password', async (req, res) => {
   }
 });
 
-// ----- GET Reset Password Form -----
+// ----- Reset Password Page -----
 app.get('/reset-password/:token', async (req, res) => {
-  const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
-  const user = await User.findOne({ resetToken: hashedToken, resetTokenExpires: { $gt: Date.now() } });
-  if (!user) return res.send('⚠️ Reset link is invalid or has expired.');
+  const hashed = crypto.createHash('sha256').update(req.params.token).digest('hex');
+  const user = await User.findOne({ resetToken: hashed, resetTokenExpires: { $gt: Date.now() } });
+
+  if (!user) return res.send('⚠️ Reset link invalid or expired.');
+
   res.render('resetPassword', { title: 'Reset Password', token: req.params.token, error: null });
 });
 
-// ----- POST Reset Password Handler -----
+// ----- Reset Password Submit -----
 app.post('/reset-password/:token', async (req, res) => {
   const { newPassword, confirmPassword } = req.body;
   if (newPassword !== confirmPassword) return res.send('❌ Passwords do not match.');
 
-  const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
-  const user = await User.findOne({ resetToken: hashedToken, resetTokenExpires: { $gt: Date.now() } });
-  if (!user) return res.send('⚠️ Reset link is invalid or expired.');
+  const hashed = crypto.createHash('sha256').update(req.params.token).digest('hex');
+  const user = await User.findOne({ resetToken: hashed, resetTokenExpires: { $gt: Date.now() } });
+
+  if (!user) return res.send('⚠️ Reset link invalid or expired.');
 
   user.passwordHash = await bcrypt.hash(newPassword, 12);
   user.resetToken = undefined;
@@ -200,36 +285,10 @@ app.post('/reset-password/:token', async (req, res) => {
   res.render('passwordResetSuccess');
 });
 
-// ----- GET Login Page -----
-app.get('/login', (req, res) => {
-  res.render('login', { title: 'Login', error: null });
-});
-
-// ----- POST Login Handler -----
-app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) return res.render('login', { title: 'Login', error: 'Email not found.' });
-    if (!user.isConfirmed) return res.render('login', { title: 'Login', error: 'Please confirm your email first.' });
-
-    const match = await bcrypt.compare(password, user.passwordHash);
-    if (!match) return res.render('login', { title: 'Login', error: 'Invalid password.' });
-
-    res.send(`✅ Welcome, ${user.username}!`);
-  } catch (err) {
-    console.error(err);
-    res.render('login', { title: 'Login', error: 'Something went wrong.' });
-  }
-});
-
 // ----- Root Redirect -----
-app.get('/', (req, res) => {
-  res.redirect('/login');
-});
+app.get('/', (req, res) => res.redirect('/login'));
 
 // ----- Start Server -----
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`🚀 Server is running on port ${process.env.PORT || 3000}`);
 });
