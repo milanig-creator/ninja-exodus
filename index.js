@@ -110,11 +110,13 @@ app.post('/register', async (req, res) => {
 
     await newUser.save();
 
+    const confirmURL = `${process.env.BASE_URL}/confirm/${confirmationToken}`;
+
     await transporter.sendMail({
       from: `"Ninja Exodus" <${process.env.SMTP_USER}>`,
       to: newUser.email,
       subject: "Confirm your Ninja Exodus account ✔",
-      text: `Click this link to confirm your account:\n\nhttp://localhost:3000/confirm/${confirmationToken}`
+      text: `Click this link to confirm your account:\n\n${confirmURL}`
     });
 
     return res.render('register', {
@@ -219,11 +221,13 @@ app.post('/forgot-password', async (req, res) => {
     user.resetTokenExpires = Date.now() + 3600000;
     await user.save();
 
+    const resetURL = `${process.env.BASE_URL}/reset-password/${token}`;
+
     await transporter.sendMail({
       from: `"Ninja Exodus" <${process.env.SMTP_USER}>`,
       to: user.email,
       subject: "Reset your password",
-      text: `Reset your password by visiting this link: http://localhost:3000/reset-password/${token}`
+      text: `Reset your password by visiting this link:\n\n${resetURL}`
     });
 
     res.render('forgotpassword', { title: 'Forgot Password', error: null, success: 'Reset link sent to your email.' });
@@ -270,5 +274,3 @@ app.get('/', (req, res) => {
 app.listen(process.env.PORT || 3000, () => {
   console.log(`🚀 Server is running on port ${process.env.PORT || 3000}`);
 });
-
-
