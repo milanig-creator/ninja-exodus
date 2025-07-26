@@ -180,7 +180,7 @@ app.get('/confirm/:token', async (req, res) => {
     user.confirmationExpires = undefined;
     await user.save();
 
-    return res.render('confirmationSuccess');
+    return res.render('confirmationsuccess');
   } catch (err) {
     console.error(err);
     return res.status(500).send('❌ Server error during confirmation.');
